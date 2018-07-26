@@ -21,7 +21,7 @@
   "require": {
     "php": ">=5.4.0",
     "yiisoft/yii2": "*",
-    "qiniu/php-sdk": "v7.0.5"
+    "qiniu/php-sdk": "v7.2.6"
   },
   "require-dev": {
     "phpunit/phpunit": ">=4.0"
