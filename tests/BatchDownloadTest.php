@@ -1,11 +1,11 @@
 <?php
 /**
  * 七牛云文件批量下载API测试
- * User: chocoboxxf
+ * User: caiyundong
  * Date: 16/3/7
  * Time: 下午10:13
  */
-namespace chocoboxxf\Qiniu\Tests;
+namespace caiyundong\Qiniu\Tests;
 
 use Yii;
 
@@ -14,7 +14,7 @@ class BatchDownloadTest extends \PHPUnit_Framework_TestCase
     public function testDownload()
     {
         $qiniu = Yii::createObject([
-            'class' => 'chocoboxxf\Qiniu\Qiniu',
+            'class' => 'caiyundong\Qiniu\Qiniu',
             'accessKey' => 'Access Key',
             'secretKey' => 'Secret Key',
             'domain' => '七牛域名',

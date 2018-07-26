@@ -1,10 +1,10 @@
 <?php
 /**
  * 七牛云上传凭证获取测试
- * User: chocoboxxf
+ * User: caiyundong
  * Date: 2017/3/29
  */
-namespace chocoboxxf\Qiniu\Tests;
+namespace caiyundong\Qiniu\Tests;
 
 use Yii;
 
@@ -13,7 +13,7 @@ class UploadTokenTest extends \PHPUnit_Framework_TestCase
     public function testGetToken()
     {
         $qiniu = Yii::createObject([
-            'class' => 'chocoboxxf\Qiniu\Qiniu',
+            'class' => 'caiyundong\Qiniu\Qiniu',
             'accessKey' => 'Access Key',
             'secretKey' => 'Secret Key',
             'domain' => '七牛域名',

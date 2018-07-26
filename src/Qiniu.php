@@ -1,11 +1,11 @@
 <?php
 /**
  * 七牛云SDK
- * User: chocoboxxf
- * Date: 15/12/5
- * Time: 下午4:32
+ * User: caiyundong
+ * Date: 26/07/2018
+ * Time: 14:58
  */
-namespace chocoboxxf\Qiniu;
+namespace caiyundong\Qiniu;
 
 use Yii;
 use yii\base\Component;
@@ -204,7 +204,7 @@ class Qiniu extends Component
     {
         // 默认使用当前配置的bucket
         if (!isset($this->managers['delete'])) {
-            $this->managers['delete'] = new BucketManager();
+            $this->managers['delete'] = new BucketManager($this->auth);
         }
         list($ret, $err) = $this->managers['delete']->delete($$bucket, $key);
 

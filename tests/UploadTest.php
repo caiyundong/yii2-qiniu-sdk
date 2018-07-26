@@ -1,11 +1,11 @@
 <?php
 /**
  * 七牛云文件上传API测试
- * User: chocoboxxf
+ * User: caiyundong
  * Date: 15/12/5
  * Time: 下午10:55
  */
-namespace chocoboxxf\Qiniu\Tests;
+namespace caiyundong\Qiniu\Tests;
 
 use Yii;
 
@@ -14,7 +14,7 @@ class UploadTest extends \PHPUnit_Framework_TestCase
     public function testPutFile()
     {
         $qiniu = Yii::createObject([
-            'class' => 'chocoboxxf\Qiniu\Qiniu',
+            'class' => 'caiyundong\Qiniu\Qiniu',
             'accessKey' => 'Access Key',
             'secretKey' => 'Secret Key',
             'domain' => '七牛域名',
@@ -28,7 +28,7 @@ class UploadTest extends \PHPUnit_Framework_TestCase
     public function testPutFileData()
     {
         $qiniu = Yii::createObject([
-            'class' => 'chocoboxxf\Qiniu\Qiniu',
+            'class' => 'caiyundong\Qiniu\Qiniu',
             'accessKey' => 'Access Key',
             'secretKey' => 'Secret Key',
             'domain' => '七牛域名',
