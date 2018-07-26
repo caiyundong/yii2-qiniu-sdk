@@ -127,3 +127,92 @@ if ($ret['code'] === 0) {
     $message = $ret['message']; // 错误信息
 }
 ```
+
+Bucket Management
+```php
+// buckets
+$shared = true;
+$buckets = Yii::$app->qiniu->buckets($shared);
+```
+
+```php
+// domains
+$buckets = Yii::$app->qiniu->domains($bucket);
+```
+
+```php
+// listFiles
+$listFiles = Yii::$app->qiniu->listFiles($bucket, $prefix, $marker, $limit, $delimiter);
+```
+
+```php
+// file stat
+$stat = Yii::$app->qiniu->stat($bucket, $key);
+```
+
+```php
+// file rename
+$result = Yii::$app->qiniu->rename($bucket, $oldfile, $newfile);
+```
+
+```php
+// file copy
+$result = Yii::$app->qiniu->copy($from_bucket, $from_key, $to_bucket, $to_key, $force);
+```
+
+```php
+// file move from one bucket to another
+$result = Yii::$app->qiniu->move($from_bucket, $from_key, $to_bucket, $to_key, $force);
+```
+
+```php
+// change MIMES
+$result = Yii::$app->qiniu->changeMime($bucket, $key, $mime);
+```
+
+```php
+// change type
+$result = Yii::$app->qiniu->changeType($bucket, $key, $fileType);
+```
+
+```php
+// change status
+$result = Yii::$app->qiniu->changeStatus($bucket, $key, $status);
+```
+
+```php
+// fetch
+$result = Yii::$app->qiniu->fetch($url, $bucket, $key);
+```
+
+```php
+// prefetch
+$result = Yii::$app->qiniu->prefetch($bucket, $key);
+```
+
+```php
+// batch - 在单次请求中进行多个资源管理操作
+$result = Yii::$app->qiniu->batch($operations);
+```
+
+```php
+// deleteAfterDays
+$result = Yii::$app->qiniu->deleteAfterDays($bucket, $key, $days);
+```
+
+ImageUrlBuilder
+
+```php
+// get thumb url
+$url = Yii::$app->qiniu->thumbnail($url, $mode, $width, $height, $format, $interlace, $quality, $ignoreError);
+
+// image watermark
+$url = Yii::$app->qiniu->waterImg($url, $image, $dissolve, $gravity, $dx, $dy, $watermarkScale);
+
+// text watermark
+$url = Yii::$app->qiniu->waterText( $url, $text, $font, $fontSize, $fontColor, $dissolve, $gravity, $dx, $dy);
+```
+
+鸣谢
+----
+@chocoboxxf/yii2-qiniu-sdk
