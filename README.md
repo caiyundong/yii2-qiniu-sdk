@@ -15,7 +15,7 @@
 ```json
 {
     "require": {
-       "chocoboxxf/yii2-qiniu-sdk": "dev-master"
+       "caiyundong/yii2-qiniu-sdk": "dev-master"
     }
 }
 ```
@@ -29,7 +29,7 @@
 'components' => [
   .....
   'qiniu' => [ 
-      'class' => 'chocoboxxf\Qiniu\Qiniu',
+      'class' => 'caiyundong\Qiniu\Qiniu',
       'accessKey' => 'Access Key',
       'secretKey' => 'Secret Key',
       'domain' => '七牛域名',
@@ -46,7 +46,7 @@ $result = Yii::$app->qiniu->putFile('img/test.jpg', __DIR__.'/test.jpg');
 ```php
 // 局部调用
 $qiniu = Yii::createObject([
-    'class' => 'chocoboxxf\Qiniu\Qiniu',
+    'class' => 'caiyundong\Qiniu\Qiniu',
     'accessKey' => 'Access Key',
     'secretKey' => 'Secret Key',
     'domain' => '七牛域名',
@@ -112,4 +112,18 @@ $expires = 7200;
 $policy = null;
 $token = Yii::$app->qiniu->uploadToken($bucket, $key, $expires, $policy);
 // TODO
+```
+
+删除文件
+
+```php
+$ret = Yii::$app->qiniu->delete($key);
+if ($ret['code'] === 0) {
+    // 删除成功
+    $url = $ret['result']['url']; 
+} else {
+    // 删除失败
+    $code = $ret['code']; // 错误码
+    $message = $ret['message']; // 错误信息
+}
 ```

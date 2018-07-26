@@ -12,6 +12,7 @@ use yii\base\Component;
 use yii\base\InvalidConfigException;
 use Qiniu\Auth;
 use Qiniu\Storage\UploadManager;
+use Qiniu\Storage\BucketManager;
 
 
 class Qiniu extends Component
@@ -195,5 +196,29 @@ class Qiniu extends Component
             $policy,
             true
         );
+    }
+
+    public function delete(
+        $bucket = null,
+        $key = null)
+    {
+        // 默认使用当前配置的bucket
+        if (!isset($this->managers['delete'])) {
+            $this->managers['delete'] = new BucketManager();
+        }
+        list($ret, $err) = $this->managers['delete']->delete($$bucket, $key);
+
+        // 正常情况
+        if (is_null($err)) {
+            return [
+                'code' => self::CODE_SUCCESS,
+                'message' => self::MESSAGE_SUCCESS
+            ];
+        }
+        else
+            return [
+                'code' => $err->code(),
+                'message' => $err->message()
+            ];
     }
 }
