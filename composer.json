@@ -1,20 +1,20 @@
 {
-  "name": "chocoboxxf/yii2-qiniu-sdk",
+  "name": "caiyundong/yii2-qiniu-sdk",
   "type": "yii2-extension",
   "description": "Qiniu API for Yii 2.0",
-  "keywords": ["yii2", "qiniu", "upload", "sdk"],
-  "homepage": "https://github.com/chocoboxxf/yii2-qiniu-sdk",
+  "keywords": ["yii2", "qiniu", "upload", "sdk", "bucket", "form", "resume"],
+  "homepage": "https://github.com/caiyundong/yii2-qiniu-sdk",
   "license": "MIT",
   "support": {
-    "issues": "https://github.com/chocoboxxf/yii2-qiniu-sdk/issues",
-    "wiki": "https://github.com/chocoboxxf/yii2-qiniu-sdk/wiki",
-    "source": "https://github.com/chocoboxxf/yii2-qiniu-sdk"
+    "issues": "https://github.com/caiyundong/yii2-qiniu-sdk/issues",
+    "wiki": "https://github.com/caiyundong/yii2-qiniu-sdk/wiki",
+    "source": "https://github.com/caiyundong/yii2-qiniu-sdk"
   },
   "authors": [
     {
-      "name": "chocoboxxf",
-      "email": "neil.xuxf@gmail.com",
-      "homepage": "https://github.com/chocoboxxf",
+      "name": "caiyundong",
+      "email": "yundong.cai@gmail.com",
+      "homepage": "https://github.com/caiyundong",
       "role": "Developer"
     }
   ],
@@ -28,12 +28,12 @@
   },
   "autoload": {
     "psr-4": {
-      "chocoboxxf\\Qiniu\\": "src/"
+      "caiyundong\\Qiniu\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "chocoboxxf\\Qiniu\\Tests\\": "tests/"
+      "caiyundong\\Qiniu\\Tests\\": "tests/"
     }
   }
 }
