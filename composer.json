@@ -2,7 +2,7 @@
   "name": "caiyundong/yii2-qiniu-sdk",
   "type": "yii2-extension",
   "description": "Qiniu API for Yii 2.0",
-  "keywords": ["yii2", "qiniu", "upload", "sdk", "bucket", "form", "resume"],
+  "keywords": ["yii2", "qiniu", "upload", "sdk", "bucket"],
   "homepage": "https://github.com/caiyundong/yii2-qiniu-sdk",
   "license": "MIT",
   "support": {

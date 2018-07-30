@@ -14,6 +14,8 @@ use Qiniu\Auth;
 use Qiniu\Storage\UploadManager;
 use Qiniu\Storage\BucketManager;
 use Qiniu\Processing\ImageUrlBuilder;
+use Qiniu\Processing\PersistentFop;
+use Qiniu\Config;
 
 
 class Qiniu extends Component
@@ -33,6 +35,8 @@ class Qiniu extends Component
 
     protected $auth;
 
+    protected $config;
+
     protected $managers;
 
     public function init()
@@ -51,6 +55,7 @@ class Qiniu extends Component
             throw new InvalidConfigException('请先配置使用的Bucket');
         }
         $this->auth = new Auth($this->accessKey, $this->secretKey);
+        $this->config = new Config();
         $this->managers = [];
     }
 
@@ -628,5 +633,41 @@ class Qiniu extends Component
             $dx,
             $dy
         );
+    }
+
+    // add a watermark to a mp4 video in the bucket
+    public function waterVideo(
+        $bucket,
+        $key,                               //test.mp4
+        $watermark_url,
+        $pipeline,                          //neihanduanzi
+        $wmGravity = "SouthEast",           //NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
+        $wmOffsetX = 0,
+        $wmOffsetY = 0,
+        $notifyUrl = ""
+    )
+    {
+        $force = false;
+        $keys = explode(".", $key);
+        //转码完成后通知到你的业务服务器。
+        $pfop = new PersistentFop(self.auth, self.config);
+        //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
+        //$fops = "avthumb/mp4/s/640x360/vb/1.4m|saveas/" . \Qiniu\base64_urlSafeEncode($bucket . ":qiniu_640x360.mp4");
+        $fops = "avthumb/mp4/wmImage/$watermark_url/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($bucket . ":{$keys[0]}_w.mp4");
+        list($id, $err) = $pfop->execute($bucket, $key, $fops, $pipeline, $notifyUrl, $force);
+        echo "\n====> pfop avthumb result: \n";
+        if ($err != null) {
+            var_dump($err);
+        } else {
+            echo "PersistentFop Id: $id\n";
+        }
+        //查询转码的进度和状态
+        list($ret, $err) = $pfop->status($id);
+        echo "\n====> pfop avthumb status: \n";
+        if ($err != null) {
+            var_dump($err);
+        } else {
+            var_dump($ret);
+        }
     }
 }
