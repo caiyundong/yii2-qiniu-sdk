@@ -1,5 +1,5 @@
 # yii2-qiniu-sdk
-基于Yii2实现的七牛云存储API SDK（使用官方SDK）（目前开发中）
+基于Yii2实现的七牛云存储API SDK（使用官方SDK）
 
 环境条件
 --------
@@ -211,6 +211,22 @@ $url = Yii::$app->qiniu->waterImg($url, $image, $dissolve, $gravity, $dx, $dy, $
 
 // text watermark
 $url = Yii::$app->qiniu->waterText( $url, $text, $font, $fontSize, $fontColor, $dissolve, $gravity, $dx, $dy);
+```
+
+Video Watermark
+
+```php
+// IMAGE watermark
+// key is old video file key
+// new_key is new  video file key
+Yii::$app->qiniu->waterVideo($key, $new_key, $watermark_url, $pipeline, $wmGravity, $wmOffsetX, $wmOffsetY = 0, $notifyUrl);
+```
+
+```php
+// TEXT watermark
+// key is old video file key
+// new_key is new  video file key
+Yii::$app->qiniu->waterVideoText($key, $new_key, $wmText, $pipeline, $wmGravityText, $wmFont,  $wmFontColor, $wmFontSize = 0, $wmOffsetX, $wmOffsetY, $notifyUrl);
 ```
 
 鸣谢
