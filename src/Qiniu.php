@@ -5,6 +5,7 @@
  * Date: 26/07/2018
  * Time: 14:58
  */
+
 namespace caiyundong\Qiniu;
 
 use Yii;
@@ -172,7 +173,7 @@ class Qiniu extends Component
         }
         foreach ($result as $fileName => $url) {
             $name = substr($fileName, strrpos($fileName, '/') + 1);
-            file_put_contents($downloadPath.'/'.$name, file_get_contents($url));
+            file_put_contents($downloadPath . '/' . $name, file_get_contents($url));
         }
         return $result;
     }
@@ -212,7 +213,7 @@ class Qiniu extends Component
      *
      * @return string[] 包含所有空间名
      */
-    public function buckets($shared=true)
+    public function buckets($shared = true)
     {
         if (!isset($this->managers['bucket'])) {
             $this->managers['bucket'] = new BucketManager($this->auth);
@@ -228,8 +229,7 @@ class Qiniu extends Component
      */
     public function domains($bucket)
     {
-        if (!isset($this->managers['bucket']))
-        {
+        if (!isset($this->managers['bucket'])) {
             $this->managers['bucket'] = new BucketManager($this->auth);
         }
         return $this->managers['bucket']->domains($bucket);
@@ -312,8 +312,7 @@ class Qiniu extends Component
                 'code' => self::CODE_SUCCESS,
                 'message' => self::MESSAGE_SUCCESS
             ];
-        }
-        else
+        } else
             return [
                 'code' => $err->code(),
                 'message' => $err->message()
@@ -369,7 +368,8 @@ class Qiniu extends Component
      * @return mixed      成功返回NULL，失败返回对象Qiniu\Http\Error
      * @link  http://developer.qiniu.com/docs/v6/api/reference/rs/move.html
      */
-    public function move($from_bucket, $from_key, $to_bucket, $to_key, $force = false) {
+    public function move($from_bucket, $from_key, $to_bucket, $to_key, $force = false)
+    {
         if (!isset($this->managers['bucket'])) {
             $this->managers['bucket'] = new BucketManager($this->auth);
         }
@@ -620,7 +620,8 @@ class Qiniu extends Component
         $gravity = 'SouthEast',
         $dx = null,
         $dy = null
-    ) {
+    )
+    {
         $imageUrlBuilder = new ImageUrlBuilder();
         return $imageUrlBuilder->waterText(
             $url,
@@ -635,25 +636,16 @@ class Qiniu extends Component
         );
     }
 
-    // add a watermark to a mp4 video in the bucket
-    public function waterVideo(
-        $key,
-        $new_key,
-        $watermark_url,
-        $pipeline,
-        $wmGravity = "SouthEast",           //NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
-        $wmOffsetX = 0,
-        $wmOffsetY = 0,
-        $notifyUrl = ""
-    )
+    /*
+     * Persistent FOP Operations
+     */
+
+    public function persistentFOP($key, $fops, $pipeline, $notifyUrl, $force = false)
     {
-        $force = false;
         //转码完成后通知到你的业务服务器。
         $pfop = new PersistentFop($this->auth, $this->config);
 
         //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
-        $fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
-        echo $fops."\n";
         list($id, $err) = $pfop->execute($this->bucket, $key, $fops, $pipeline, $notifyUrl, $force);
         echo "\n====> pfop avthumb result: \n";
         if ($err != null) {
@@ -669,6 +661,98 @@ class Qiniu extends Component
         } else {
             return $ret;
         }
+    }
+
+    // 音视频转码接口方便用户对音频、视频资源进行编码和格式转换。
+    public function audio_encode($key,
+                                 $format,               # e.g. mp3, wav; # https://developer.qiniu.com/dora/kb/1320/avthumb-parameters-formats-format-and-explanation
+                                 $bit_rate = "",           # 音频码率，单位：比特每秒（bit/s），常用码率：64k，128k，192k，256k，320k等。
+                                 $audio_quality = "",     # 音频质量，取值范围为0-9（mp3），10-500（aac），仅支持mp3和aac，值越小越高
+                                 $sampling_rate = "",     # 音频采样频率，单位：赫兹（Hz），常用采样频率：8000，12050，22050，44100等。
+                                 $pipeline,
+                                 $notifyUrl
+    )
+    {
+        $fops = "avthumb/$format/ab/$bit_rate/aq/$audio_quality/ar/$sampling_rate";
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
+    }
+
+    // 音视频转码接口方便用户对音频、视频资源进行编码和格式转换。
+    public function video_encode($key,
+                                 $format,               # e.g. mp4 etc.
+                                 $framerate,            # 视频帧率，每秒显示的帧数，单位：赫兹（Hz），常用帧率：24，25，30等
+                                 $bit_rate,             # 视频码率，单位：比特每秒（bit/s），常用视频码率：128k，1.25m，5m等
+                                 $video_codec,          # 视频编码格式
+                                 $audio_codec,          # 音频编码格式
+                                 $start = 0,              # 指定音视频截取的开始时间，单位：秒，支持精确到毫秒，例如3.345s
+                                 $duration,             # 指定视频截取的长度，单位：秒，支持精确到毫秒，例如1.500s。
+                                 $resolution,           # 指定视频分辨率，格式为<width>x<height>
+                                 $rotate,                # 指定顺时针旋转的度数, 90, 180, 270, auto, 默认为不旋转。
+                                 $pipeline,
+                                 $notifyUrl
+    )
+    {
+        $fops = "avthumb/$format/r/$framerate/vb/$bit_rate/vcodec/$video_codec/acodec/$audio_codec/ss/$start/t/$duration/s/$resolution/rotate/$rotate";
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
+    }
+
+    public function video_mute($key, $pipeline, $notifyUrl)
+    {
+        $fops = "avthumb/an/1";
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
+    }
+
+    // 音视频拼接接口(avconcat)用于将指定的数个音频片段拼接成一段音频，或者将数个视频片段拼接成一段视频。
+    public function avconcat()
+    {
+
+    }
+
+    // 音视频切片接口用于支持HTTP Live Streaming播放
+    public function audio_slice()
+    {
+
+    }
+
+    // 音视频切片接口用于支持HTTP Live Streaming播放
+    public function video_slice()
+    {
+
+    }
+
+    // 音视频元信息接口(avinfo)用于获取指定音频、视频资源的元信息。
+    public function avinfo()
+    {
+
+    }
+
+    // 视频帧缩略图接口(vframe)用于从视频流中截取指定时刻的单帧画面并按指定大小缩放成图片。
+    public function vframe()
+    {
+
+    }
+
+    // 视频采样缩略图接口(vsample)用于从视频文件中截取多帧画面并按指定大小缩放成图片。
+    public function vsample()
+    {
+
+    }
+
+    // add a watermark to a mp4 video in the bucket
+    public function waterVideo(
+        $key,
+        $new_key,
+        $watermark_url,
+        $pipeline,
+        $wmGravity = "SouthEast",           //NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
+        $wmOffsetX = 0,
+        $wmOffsetY = 0,
+        $notifyUrl = ""
+    )
+    {
+        //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
+        $fops = "avthumb/mp4/wmImage/" . \Qiniu\base64_urlSafeEncode($watermark_url) . "/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 
     // add a watermark to a mp4 video in the bucket
@@ -686,28 +770,8 @@ class Qiniu extends Component
         $notifyUrl = ""
     )
     {
-        $force = false;
-
-        //转码完成后通知到你的业务服务器。
-        $pfop = new PersistentFop($this->auth, $this->config);
-
         //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
-        $fops = "avthumb/mp4/wmText/".\Qiniu\base64_urlSafeEncode($wmText)."/wmGravityText/$wmGravityText/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY/wmFont/".\Qiniu\base64_urlSafeEncode($wmFont)."/wmFontColor/".\Qiniu\base64_urlSafeEncode($wmFontColor)."/wmFontSize".\Qiniu\base64_urlSafeEncode($wmFontSize)."|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
-        echo $fops."\n";
-        list($id, $err) = $pfop->execute($this->bucket, $key, $fops, $pipeline, $notifyUrl, $force);
-        echo "\n====> pfop avthumb result: \n";
-        if ($err != null) {
-            var_dump($err);
-        } else {
-            echo "PersistentFop Id: $id\n";
-        }
-        //查询转码的进度和状态
-        list($ret, $err) = $pfop->status($id);
-        echo "\n====> pfop avthumb status: \n";
-        if ($err != null) {
-            return $err;
-        } else {
-            return $ret;
-        }
+        $fops = "avthumb/mp4/wmText/" . \Qiniu\base64_urlSafeEncode($wmText) . "/wmGravityText/$wmGravityText/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY/wmFont/" . \Qiniu\base64_urlSafeEncode($wmFont) . "/wmFontColor/" . \Qiniu\base64_urlSafeEncode($wmFontColor) . "/wmFontSize" . \Qiniu\base64_urlSafeEncode($wmFontSize) . "|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 }
