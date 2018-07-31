@@ -219,14 +219,14 @@ Video Watermark
 // IMAGE watermark
 // key is old video file key
 // new_key is new  video file key
-Yii::$app->qiniu->waterVideo($key, $new_key, $watermark_url, $pipeline, $wmGravity, $wmOffsetX, $wmOffsetY = 0, $notifyUrl);
+Yii::$app->qiniu->waterVideo($key, $new_key, $watermark_url, $pipeline, $wmGravity, $wmOffsetX, $wmOffsetY, $notifyUrl);
 ```
 
 ```php
 // TEXT watermark
 // key is old video file key
 // new_key is new  video file key
-Yii::$app->qiniu->waterVideoText($key, $new_key, $wmText, $pipeline, $wmGravityText, $wmFont,  $wmFontColor, $wmFontSize = 0, $wmOffsetX, $wmOffsetY, $notifyUrl);
+Yii::$app->qiniu->waterVideoText($key, $new_key, $wmText, $pipeline, $wmGravityText, $wmFont,  $wmFontColor, $wmFontSize, $wmOffsetX, $wmOffsetY, $notifyUrl);
 ```
 
 鸣谢
