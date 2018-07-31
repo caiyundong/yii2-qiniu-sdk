@@ -637,7 +637,6 @@ class Qiniu extends Component
 
     // add a watermark to a mp4 video in the bucket
     public function waterVideo(
-        $bucket,
         $key,                               //test.mp4
         $watermark_url,
         $pipeline,                          //neihanduanzi
@@ -649,12 +648,20 @@ class Qiniu extends Component
     {
         $force = false;
         $keys = explode(".", $key);
+        echo $this->bucket."\n";
         //转码完成后通知到你的业务服务器。
-        $pfop = new PersistentFop(self.auth, self.config);
+        $pfop = new PersistentFop($this->auth, $this->config);
+        print_r($this->auth);
+        print_r($this->config);
         //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
         //$fops = "avthumb/mp4/s/640x360/vb/1.4m|saveas/" . \Qiniu\base64_urlSafeEncode($bucket . ":qiniu_640x360.mp4");
-        $fops = "avthumb/mp4/wmImage/$watermark_url/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($bucket . ":{$keys[0]}_w.mp4");
-        list($id, $err) = $pfop->execute($bucket, $key, $fops, $pipeline, $notifyUrl, $force);
+        //$fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY";
+        $base64URL = \Qiniu\base64_urlSafeEncode($watermark_url);
+        //$fops = "avthumb/mp4/s/640x360/vb/1.4m/image/" . $base64URL . "|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":qiniu_wm.mp4");
+
+        $fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$keys[0]}_w.mp4");
+        echo $fops."\n";
+        list($id, $err) = $pfop->execute($this->bucket, $key, $fops, $pipeline, $notifyUrl, $force);
         echo "\n====> pfop avthumb result: \n";
         if ($err != null) {
             var_dump($err);
