@@ -1,5 +1,6 @@
 {
   "name": "caiyundong/yii2-qiniu-sdk",
+  "version": "1.0.1",
   "type": "yii2-extension",
   "description": "Qiniu API for Yii 2.0",
   "keywords": ["yii2", "qiniu", "upload", "sdk", "bucket"],

@@ -637,9 +637,10 @@ class Qiniu extends Component
 
     // add a watermark to a mp4 video in the bucket
     public function waterVideo(
-        $key,                               //test.mp4
+        $key,
+        $new_key,
         $watermark_url,
-        $pipeline,                          //neihanduanzi
+        $pipeline,
         $wmGravity = "SouthEast",           //NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
         $wmOffsetX = 0,
         $wmOffsetY = 0,
@@ -647,19 +648,11 @@ class Qiniu extends Component
     )
     {
         $force = false;
-        $keys = explode(".", $key);
-        echo $this->bucket."\n";
         //转码完成后通知到你的业务服务器。
         $pfop = new PersistentFop($this->auth, $this->config);
-        print_r($this->auth);
-        print_r($this->config);
-        //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
-        //$fops = "avthumb/mp4/s/640x360/vb/1.4m|saveas/" . \Qiniu\base64_urlSafeEncode($bucket . ":qiniu_640x360.mp4");
-        //$fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY";
-        $base64URL = \Qiniu\base64_urlSafeEncode($watermark_url);
-        //$fops = "avthumb/mp4/s/640x360/vb/1.4m/image/" . $base64URL . "|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":qiniu_wm.mp4");
 
-        $fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$keys[0]}_w.mp4");
+        //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
+        $fops = "avthumb/mp4/wmImage/".\Qiniu\base64_urlSafeEncode($watermark_url)."/wmGravity/$wmGravity/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
         echo $fops."\n";
         list($id, $err) = $pfop->execute($this->bucket, $key, $fops, $pipeline, $notifyUrl, $force);
         echo "\n====> pfop avthumb result: \n";
@@ -672,9 +665,49 @@ class Qiniu extends Component
         list($ret, $err) = $pfop->status($id);
         echo "\n====> pfop avthumb status: \n";
         if ($err != null) {
+            return $err;
+        } else {
+            return $ret;
+        }
+    }
+
+    // add a watermark to a mp4 video in the bucket
+    public function waterVideoText(
+        $key,
+        $new_key,
+        $wmText = "",
+        $pipeline,
+        $wmGravityText = "SouthEast",                   // NorthWest, North, NorthEast, West, Center, East, SouthWest, South, SouthEast
+        $wmFont = "黑体",                               // 文本字体（详见支持字体列表），需要经过urlsafe_base64_encode，默认为黑体。注意：中文水印必须指定中文字体。
+        $wmFontColor = "black",                         // 水印文字颜色，需要经过urlsafe_base64_encode，RGB格式，可以是颜色名称（例如red）或十六进制（例如 #FF0000），默认为黑色。
+        $wmFontSize = 0,                                // 水印文字大小，单位: 缇，等于1/20磅，默认值0（默认大小）。
+        $wmOffsetX = 0,
+        $wmOffsetY = 0,
+        $notifyUrl = ""
+    )
+    {
+        $force = false;
+
+        //转码完成后通知到你的业务服务器。
+        $pfop = new PersistentFop($this->auth, $this->config);
+
+        //要进行转码的转码操作。 http://developer.qiniu.com/docs/v6/api/reference/fop/av/avthumb.html
+        $fops = "avthumb/mp4/wmText/".\Qiniu\base64_urlSafeEncode($wmText)."/wmGravityText/$wmGravityText/wmOffsetX/$wmOffsetX/wmOffsetY/$wmOffsetY/wmFont/".\Qiniu\base64_urlSafeEncode($wmFont)."/wmFontColor/".\Qiniu\base64_urlSafeEncode($wmFontColor)."/wmFontSize".\Qiniu\base64_urlSafeEncode($wmFontSize)."|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$new_key}");
+        echo $fops."\n";
+        list($id, $err) = $pfop->execute($this->bucket, $key, $fops, $pipeline, $notifyUrl, $force);
+        echo "\n====> pfop avthumb result: \n";
+        if ($err != null) {
             var_dump($err);
         } else {
-            var_dump($ret);
+            echo "PersistentFop Id: $id\n";
+        }
+        //查询转码的进度和状态
+        list($ret, $err) = $pfop->status($id);
+        echo "\n====> pfop avthumb status: \n";
+        if ($err != null) {
+            return $err;
+        } else {
+            return $ret;
         }
     }
 }
