@@ -703,39 +703,77 @@ class Qiniu extends Component
     }
 
     // 音视频拼接接口(avconcat)用于将指定的数个音频片段拼接成一段音频，或者将数个视频片段拼接成一段视频。
-    public function avconcat()
+    public function avconcat(
+                                $key,                   // 源文件
+                                $format,                // mp4, flv
+                                $index=1,             // 用于设置源文件在拼接时的位置（表示位于第几个视频），默认值为1
+                                $encodedUrls,
+                                $pipeline,
+                                $notifyUrl)
     {
-
+        $fops = "avconcat/2/format/$format/index/$index";
+        foreach($encodedUrls as $encodeUrl){
+            $fops .= "/".\Qiniu\base64_urlSafeEncode($encodeUrl);
+        }
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 
     // 音视频切片接口用于支持HTTP Live Streaming播放
-    public function audio_slice()
+    public function video_slice($key,
+                                $noDomain=1,
+                                $bit_rate,          # 视频比特率，单位为比特每秒 (bit/s)，常用的视频比特率有：128k,1.25m,5m等。
+                                $duration,          # 指定视频截取的长度，单位为秒，支持精确到毫秒，例如1.500s。
+                                $pipeline,
+                                $notifyUrl)
     {
-
-    }
-
-    // 音视频切片接口用于支持HTTP Live Streaming播放
-    public function video_slice()
-    {
-
+        $fops = "avthumb/m3u8/noDomain/$noDomain/vb/$bit_rate/t/$duration";
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 
     // 音视频元信息接口(avinfo)用于获取指定音频、视频资源的元信息。
-    public function avinfo()
+    public function avinfo($av_url)
     {
-
+        return $av_url."?avinfo";
     }
 
     // 视频帧缩略图接口(vframe)用于从视频流中截取指定时刻的单帧画面并按指定大小缩放成图片。
-    public function vframe()
+    public function vframe(
+                            $key,           # video url
+                            $image_key,
+                            $format,        # jpg or png
+                            $offset=0,        # 指定截取视频的时刻，单位：秒，精确到毫秒。
+                            $w=0,             # width
+                            $h=0,             # height
+                            $rotate=0,         # rotate degree
+                            $pipeline,
+                            $notifyUrl
+                        )
     {
-
+        $fops = "vframe/format/$format/offset/$offset/w";
+        if($w>0)
+            $fops .="/w/$w";
+        if($h>0)
+            $fops .="/h/$h";
+        if($rotate>0)
+            $fops .="/rotate/$rotate";
+        $fops .= "|saveas/" . \Qiniu\base64_urlSafeEncode($this->bucket . ":{$image_key}");
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 
     // 视频采样缩略图接口(vsample)用于从视频文件中截取多帧画面并按指定大小缩放成图片。
-    public function vsample()
+    public function vsample($key,
+                            $format,        // jpg or png
+                            $start_time=0,            // starttime
+                            $duration,                 // 采样总时长，单位：秒
+                            $resolution,                //缩略图分辨率，单位：像素（px），格式：<Width>x<Height>，
+                            $rotate,                    //指定顺时针旋转的度数，可取值为90、180、270、auto。
+                            $interval=5,                  // 指定采样间隔，单元：秒。
+                            $pattern,                       // e.g. vframe-$(count)
+                            $pipeline,
+                            $notifyUrl)
     {
-
+        $fops = "vsample/$format/ss/$start_time/t/$duration/s/$resolution/rotate/$rotate/interval/$interval/pattern/" . \Qiniu\base64_urlSafeEncode($pattern);
+        return $this->persistentFOP($key, $fops, $pipeline, $notifyUrl);
     }
 
     // add a watermark to a mp4 video in the bucket
